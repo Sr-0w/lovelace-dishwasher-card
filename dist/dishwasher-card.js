@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.2.2-dev — native header, auto grid height; MIT */
+/* Dishwasher Card v0.3.0-dev — compact settings and clean status, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -27,11 +27,11 @@
  .segment-btn.selected:disabled{opacity:.8}
  .segment-btn:focus-visible{outline:2px solid var(--primary-color,#ff6a00);outline-offset:-2px}
  .segment-btn:active:not(:disabled){transform:scale(.97)}
- .controls{display:grid;grid-template-columns:1.1fr 1fr;gap:8px;padding:4px 12px 12px}
- .button{height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--divider-color,#404040);border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:650}
+ .controls{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding:5px 12px 12px}
+ .button{height:46px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--divider-color,#404040);border-radius:var(--ha-border-radius-lg,10px);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600}
  .button:disabled{opacity:.35;cursor:not-allowed}.button:active:not(:disabled){transform:scale(.98)}
  .button ha-icon{--mdc-icon-size:20px}.primary{background:var(--dw-orange);border-color:var(--dw-orange);color:#fff}
- .secondary{background:var(--secondary-background-color,#292929);color:var(--primary-text-color,#eee)}
+ .secondary{background:var(--secondary-background-color,#292929);color:var(--secondary-text-color,#ccc);border-color:var(--divider-color,#444)} .secondary ha-icon{--mdc-icon-size:22px}
  @media(max-width:355px){.segment{margin:7px 8px 9px}.segment-btn{height:57px;font-size:10px;gap:3px}.segment-btn ha-icon{--mdc-icon-size:21px}.overview{padding:11px}.program-name{font-size:23px}.controls{padding:8px}.button{font-size:11px}}
  `;
  class DishwasherCard extends HTMLElement{
@@ -98,7 +98,7 @@
    if(optionList.length>presets.length){
     segments.push(`<button class="segment-btn ${programActiveOutside?"selected":""}" data-action="program-more" title="${esc(L.more)}" aria-label="${esc(L.more)}"><ha-icon icon="mdi:dots-horizontal"></ha-icon>${esc(L.more)}</button>`);
    }
-   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div><div class="quick-stats"><span class="${remote?"":"warn"}"><ha-icon icon="mdi:remote"></ha-icon>${esc(remote?L.remote_on:L.remote_off)}</span>${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>${segments.length?`<div class="segment">${segments.join("")}</div>`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details"><ha-icon icon="mdi:tune"></ha-icon>${esc(L.details)}</button></div></ha-card>`;
+   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div>${!remote||completion?`<div class="quick-stats">${!remote?`<span class="warn"><ha-icon icon="mdi:remote-off"></ha-icon>${esc(L.remote_off)}</span>`:""}${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>`:""}${segments.length?`<div class="segment">${segments.join("")}</div>`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details" aria-label="${esc(L.details)}" title="${esc(L.details)}"><ha-icon icon="mdi:tune-variant"></ha-icon></button></div></ha-card>`;
   }
  }
  customElements.define(TYPE,DishwasherCard);
