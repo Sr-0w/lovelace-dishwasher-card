@@ -2,7 +2,7 @@
 
 A compact, device-agnostic Lovelace card with a program/status dial, cycle state, current power, estimated completion, remote availability, and a context-aware **Start / Pause / Resume** button.
 
-**Status: 0.1.0 development prototype.** Tested with simulated device states, but **not yet validated on a live Home Assistant instance**. Do not publish a stable release before testing on real hardware.
+**Status: 0.1.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
 
 ![Dishwasher Card concept preview](docs/preview.svg)
 
@@ -51,6 +51,21 @@ labels:
   resume: Reprendre
   details: Options et détails
   finish: Fin
+```
+
+The card uses a **native-looking segmented program selector**, without an appliance illustration or circular progress dial. The default visible program shortcuts are **Eco**, **Auto** (`ai`) and **Intensive**. The active choice has an orange background. **Other** opens Home Assistant's entity dialog for any of the other supported cycles. Only supported choices from the `select.*` entity's `options` attribute are shown. Changing a program invokes `select.select_option` and is disabled while a cycle is running.
+
+Use `program_presets` to change the visible shortcuts, and optionally `program_icons` to provide MDI icons (e.g. `eco: mdi:leaf`). Both are device-agnostic. For example:
+
+```yaml
+program_presets:
+  - eco
+  - ai
+  - intensive
+program_icons:
+  eco: mdi:leaf
+  ai: mdi:autorenew
+  intensive: mdi:fire
 ```
 
 Required entity mappings: `state` and `program`. All others are optional. The state entity supports `run`, `running`, `pause`, `paused`, `stop`, `idle` and other common values.
