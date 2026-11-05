@@ -1,5 +1,12 @@
 # Dishwasher Card for Home Assistant
 
+## Scheduled / delayed start support (v0.7.0-dev)
+
+The card can display a **scheduled start** instead of a misleading "Pause" action when a supported detailed job-state entity reports `delay_washing` (or `delayWashing`). It accepts optional `entities.job_state`, `entities.operating_progress`, `entities.time_left_to_start`, and `entities.cycle_duration` entity mappings. When delayed, it shows the computed starting time and optionally the projected finish, suppresses the old `completion_time` and disables misleading pause/program commands. The displayed time uses the reported minutes relative to the sensor's `last_updated` timestamp. These options are also in the visual editor.
+
+**Dependency:** Standard Home Assistant SmartThings currently does **not** expose these Samsung CE attributes as sensors. [A proposed upstream patch](docs/upstream-smartthings-delayed-start.patch) adds them. Until those entities exist in HA, the card cannot reliably detect a delayed start. It does not guess based on idle power or `machineState: run`.
+
+
 A compact, device-agnostic Lovelace card with a segmented program selector, simple power/status summary, and context-aware **Start / Pause / Resume** action. The oversized detail button has been replaced by an icon-only settings button.
 
 **Status: v0.6.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
