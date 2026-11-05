@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.5.0-dev — compact single-line program selector, MIT */
+/* Dishwasher Card v0.5.1-dev — matched segment corner radii, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -19,12 +19,12 @@
  .quick-stats{padding:0 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dw-muted);font-size:11px}
  .quick-stats span{display:flex;align-items:center;gap:5px}.quick-stats .warn{color:var(--dw-orange)}.quick-stats ha-icon{--mdc-icon-size:15px}
  .mode-heading{padding:6px 15px 0;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--dw-muted)}
- .segment{margin:8px 12px 10px;padding:3px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:var(--ha-border-radius-xl,13px);overflow:hidden}
+ .segment{--segment-radius:var(--ha-border-radius-xl,13px);--segment-inset:3px;margin:8px 12px 10px;padding:var(--segment-inset);display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:var(--segment-radius);overflow:hidden}
  .segment.extras{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:-4px;background:transparent;border-style:dashed}
- .segment-btn{height:45px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px 1px;border:0;border-radius:var(--ha-border-radius-md,8px);background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:9px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
+ .segment-btn{height:45px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px 1px;border:0;border-radius:calc(var(--segment-radius) - var(--segment-inset) - 1px);background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:9px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
  .segment-label{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
  .segment-btn ha-icon{--mdc-icon-size:17px}
- .segment-btn.selected{background:var(--dw-orange);color:#fff;box-shadow:0 2px 7px #0002}
+ .segment-btn.selected{background:var(--dw-orange);color:#fff;box-shadow:none}
  .segment-btn:disabled{opacity:.35;cursor:not-allowed}
  .segment-btn.selected:disabled{opacity:.8}
  .segment-btn:focus-visible{outline:2px solid var(--primary-color,#ff6a00);outline-offset:-2px}
