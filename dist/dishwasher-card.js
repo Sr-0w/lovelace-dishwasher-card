@@ -109,3 +109,84 @@
  window.customCards=window.customCards||[];
  window.customCards.push({type:TYPE,name:"Dishwasher Card",description:"Native-feeling dishwasher card with thermostat-style program selector",preview:false,documentationURL:"https://github.com/Sr-0w/lovelace-dishwasher-card"});
 })();
+
+
+/* Visual editor: uses Home Assistant's ha-form and entity/select selectors. */
+(function registerVisualEditor(){
+  const TYPE="dishwasher-card",EDITOR=TYPE+"-editor";
+  const Card=customElements.get(TYPE);
+  if(!Card||customElements.get(EDITOR))return;
+  const SPEC=[{"title":"Général","fields":[{"path":"name","label":"Nom de l’appareil","kind":"text"},{"path":"detail_path","label":"Chemin de la vue détaillée","kind":"text"},{"path":"show_header","label":"Afficher le titre","kind":"bool","default":true},{"path":"show_program","label":"Afficher le programme en cours","kind":"bool","default":true},{"path":"show_power","label":"Afficher la puissance","kind":"bool","default":true},{"path":"show_remote_warning","label":"Avertissement de commande distante","kind":"bool","default":true},{"path":"show_completion","label":"Afficher l’heure de fin","kind":"bool","default":true},{"path":"show_selector","label":"Sélecteur de programmes","kind":"bool","default":true},{"path":"show_controls","label":"Boutons d’action","kind":"bool","default":true}]},{"title":"Entités — lave-vaisselle","fields":[{"path":"entities.state","label":"État de la machine","kind":"entity","domain":"sensor"},{"path":"entities.program","label":"Programme (select)","kind":"entity","domain":"select"},{"path":"entities.remote","label":"Commande distante activée","kind":"entity","domain":"binary_sensor"},{"path":"entities.completion","label":"Heure de fin estimée","kind":"entity","domain":"sensor"},{"path":"entities.power","label":"Puissance instantanée","kind":"entity","domain":"sensor"},{"path":"entities.water","label":"Consommation d’eau","kind":"entity","domain":"sensor"},{"path":"entities.start","label":"Bouton de démarrage","kind":"entity","domain":"button"},{"path":"entities.pause","label":"Bouton pause","kind":"entity","domain":"button"},{"path":"entities.resume","label":"Bouton reprise","kind":"entity","domain":"button"}]},{"title":"Programmes et personnalisation","fields":[{"path":"program_presets","label":"Programmes rapides (choix et ordre)","kind":"multi"},{"path":"program_labels","label":"Libellés des programmes (code: nom)","kind":"map"},{"path":"program_short_labels","label":"Libellés courts (code: nom)","kind":"map"},{"path":"program_icons","label":"Icônes (code: mdi:icon)","kind":"map"},{"path":"state_values.running","label":"États correspondant à un cycle actif (CSV)","kind":"text"},{"path":"state_values.paused","label":"États correspondant à une pause (CSV)","kind":"text"},{"path":"state_values.stopped","label":"États correspondant à l’arrêt (CSV)","kind":"text"}]},{"title":"Couleurs et disposition","fields":[{"path":"colors.active","label":"Couleur du programme actif","kind":"color","default":"#FF6A00"},{"path":"colors.running","label":"Couleur du cycle en cours","kind":"color","default":"#52DCA5"},{"path":"colors.paused","label":"Couleur d’un cycle en pause","kind":"color","default":"#FFB34E"},{"path":"colors.text","label":"Couleur des intitulés","kind":"color"},{"path":"colors.background","label":"Fond des segments","kind":"color"},{"path":"appearance.program_columns","label":"Nombre de colonnes","kind":"number","default":8,"min":1,"max":12},{"path":"appearance.program_height","label":"Hauteur des programmes (px)","kind":"number","default":45,"min":28,"max":100},{"path":"appearance.program_icon_size","label":"Taille des icônes (px)","kind":"number","default":17,"min":12,"max":40},{"path":"appearance.program_font_size","label":"Taille des libellés (px)","kind":"number","default":9,"min":7,"max":18},{"path":"appearance.corner_radius","label":"Rayon du conteneur (px)","kind":"number","default":13,"min":4,"max":30},{"path":"appearance.action_height","label":"Hauteur des contrôles (px)","kind":"number","default":46,"min":30,"max":80}]},{"title":"Traduction et libellés","fields":[{"path":"labels.idle","label":"idle","kind":"text"},{"path":"labels.running","label":"running","kind":"text"},{"path":"labels.paused","label":"paused","kind":"text"},{"path":"labels.unavailable","label":"unavailable","kind":"text"},{"path":"labels.program","label":"program","kind":"text"},{"path":"labels.remote_on","label":"remote_on","kind":"text"},{"path":"labels.remote_off","label":"remote_off","kind":"text"},{"path":"labels.start","label":"start","kind":"text"},{"path":"labels.pause","label":"pause","kind":"text"},{"path":"labels.resume","label":"resume","kind":"text"},{"path":"labels.details","label":"details","kind":"text"},{"path":"labels.finish","label":"finish","kind":"text"},{"path":"labels.more","label":"more","kind":"text"},{"path":"labels.power","label":"power","kind":"text"}]}];
+  const toKey=path=>path.replaceAll(".","__");
+  const get=(obj,path)=>path.split(".").reduce((a,k)=>a?.[k],obj);
+  const put=(obj,path,value)=>{
+    const keys=path.split("."),stack=[obj];let at=obj;
+    for(const k of keys.slice(0,-1)){if(!at[k]||typeof at[k]!=="object"||Array.isArray(at[k]))at[k]={};at=at[k];stack.push(at);}
+    const key=keys.at(-1);
+    if(value===undefined||value===null||value==="")delete at[key];else at[key]=value;
+    for(let i=keys.length-2;i>=0;i--){if(Object.keys(stack[i+1]).length===0)delete stack[i][keys[i]];}
+  };
+  const mapAsText=v=>Object.entries(v&&typeof v==="object"&&!Array.isArray(v)?v:{}).map(([k,x])=>k+": "+String(x)).join("\n");
+  const parseMap=s=>{const out={};for(const line of String(s??"").split(/\r?\n/)){const i=line.indexOf(":");if(i<1)continue;const key=line.slice(0,i).trim(),v=line.slice(i+1).trim();if(/^[\w.-]+$/.test(key)&&v)out[key]=v;}return out};
+  const modesAsText=v=>(Array.isArray(v)?v:[]).map(m=>[m.entity??"",m.label??"",m.icon??"mdi:power"].join(" | ")).join("\n");
+  const parseModes=s=>String(s??"").split(/\r?\n/).map(l=>l.split("|").map(x=>x.trim())).filter(v=>/^(switch|input_boolean)\.[\w]+$/.test(v[0]??"")).map(([entity,label,icon])=>({entity,label:label||entity.split(".").at(-1),icon:icon||"mdi:power"}));
+  const safeColor=s=>typeof s==="string"&&/^#[\da-f]{3,8}$/i.test(s)?s:"#ff6a00";
+  class CardVisualEditor extends HTMLElement {
+    constructor(){super();this.attachShadow({mode:"open"});this._config={type:"custom:"+TYPE};this._hass=undefined;this._rendered=false;}
+    setConfig(config){this._config=JSON.parse(JSON.stringify(config??{type:"custom:"+TYPE}));this._render();}
+    set hass(hass){this._hass=hass;if(!this._rendered)this._render();else for(const form of this.shadowRoot.querySelectorAll("ha-form"))form.hass=hass;}
+    _options(){
+      if(TYPE!=="dishwasher-card")return [];
+      const id=this._config.entities?.program;
+      const options=this._hass?.states?.[id]?.attributes?.options;
+      const list=[...(Array.isArray(options)?options:[]),...(this._config.program_presets??[])];
+      return [...new Set(list.filter(x=>typeof x==="string"&&x.trim()))].map(code=>({value:code,label:this._config.program_labels?.[code]??code.replaceAll("_"," ")}));
+    }
+    _fieldSchema(field){
+      const schema={name:toKey(field.path)};
+      if(field.kind==="entity")schema.selector={entity:field.domain?{filter:{domain:field.domain}}:{}};
+      else if(field.kind==="bool")schema.selector={boolean:{}};
+      else if(field.kind==="number")schema.selector={number:{min:field.min??0,max:field.max??500,step:field.step??1,mode:"box"}};
+      else if(field.kind==="multi"){const opts=this._options();schema.selector={select:{options:opts.length?opts:[{value:"eco",label:"eco"}],multiple:true,reorder:true,mode:"dropdown"}};}
+      else schema.selector={text:field.kind==="map"||field.kind==="modes"?{multiline:true}:{}};
+      return schema;
+    }
+    _fieldValue(f){
+      const v=get(this._config,f.path);
+      return f.kind==="map"?mapAsText(v):f.kind==="modes"?modesAsText(v):f.kind==="multi"?(Array.isArray(v)?v:[]):v??f.default;
+    }
+    _onForm(group,values){
+      const next=JSON.parse(JSON.stringify(this._config));
+      for(const f of group.fields){
+        const key=toKey(f.path);if(!Object.prototype.hasOwnProperty.call(values,key))continue;
+        let value=values[key];
+        if(f.kind==="map")value=parseMap(value);
+        if(f.kind==="modes")value=parseModes(value);
+        if(f.kind==="multi")value=Array.isArray(value)?value:[];
+        if(f.kind==="number"&&value!=="")value=Number(value);
+        put(next,f.path,value);
+      }
+      this._config=next;
+      this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:next},bubbles:true,composed:true}));
+    }
+    _render(){
+      if(!this.isConnected&&!this._hass)return;
+      const html=SPEC.map((group,i)=>'<details '+(i===0||i===1?'open':'')+'><summary>'+group.title+'</summary><div class="content"><ha-form data-group="'+i+'"></ha-form></div></details>').join("");
+      this.shadowRoot.innerHTML='<style>:host{display:block;color:var(--primary-text-color)}details{border:1px solid var(--divider-color);border-radius:var(--ha-border-radius-md,10px);margin:8px 0;overflow:hidden}summary{padding:14px;font-size:14px;font-weight:600;cursor:pointer;background:var(--secondary-background-color)}.content{padding:14px}ha-form{display:block}ha-form::part(root){display:block}summary:focus-visible{outline:2px solid var(--primary-color)}</style>'+html;
+      this._rendered=true;
+      SPEC.forEach((group,i)=>{
+        const form=this.shadowRoot.querySelector('ha-form[data-group="'+i+'"]');
+        if(!form)return;
+        form.hass=this._hass;
+        form.schema=group.fields.map(f=>this._fieldSchema(f));
+        form.data=Object.fromEntries(group.fields.map(f=>[toKey(f.path),this._fieldValue(f)]).filter(([,v])=>v!==undefined));
+        form.computeLabel=schema=>group.fields.find(f=>toKey(f.path)===schema.name)?.label??schema.name;
+        form.computeHelper=schema=>group.fields.find(f=>toKey(f.path)===schema.name)?.help;
+        form.addEventListener("value-changed",ev=>{ev.stopPropagation();if(ev.detail?.value&&typeof ev.detail.value==="object")this._onForm(group,ev.detail.value);});
+      });
+    }
+    connectedCallback(){if(!this._rendered)this._render();}
+  }
+  customElements.define(EDITOR,CardVisualEditor);
+  Card.getConfigElement=()=>document.createElement(EDITOR);
+})();
