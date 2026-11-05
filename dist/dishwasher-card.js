@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.3.0-dev — compact settings and clean status, MIT */
+/* Dishwasher Card v0.4.0-dev — expanded programs and responsive segments, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -19,8 +19,9 @@
  .quick-stats{padding:0 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dw-muted);font-size:11px}
  .quick-stats span{display:flex;align-items:center;gap:5px}.quick-stats .warn{color:var(--dw-orange)}.quick-stats ha-icon{--mdc-icon-size:15px}
  .mode-heading{padding:6px 15px 0;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--dw-muted)}
- .segment{margin:9px 12px 12px;padding:4px;display:flex;gap:3px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:13px;overflow:hidden}
- .segment-btn{height:64px;min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;border-radius:10px;background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
+ .segment{margin:9px 12px 11px;padding:4px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:13px;overflow:hidden}
+ .segment.extras{margin-top:-3px;background:transparent;border-style:dashed}
+ .segment-btn{height:56px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;border-radius:10px;background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
  .segment-btn ha-icon{--mdc-icon-size:24px}
  .segment-btn.selected{background:var(--dw-orange);color:#fff;box-shadow:0 2px 7px #0002}
  .segment-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -35,7 +36,7 @@
  @media(max-width:355px){.segment{margin:7px 8px 9px}.segment-btn{height:57px;font-size:10px;gap:3px}.segment-btn ha-icon{--mdc-icon-size:21px}.overview{padding:11px}.program-name{font-size:23px}.controls{padding:8px}.button{font-size:11px}}
  `;
  class DishwasherCard extends HTMLElement{
-  constructor(){super();this.attachShadow({mode:"open"});this.shadowRoot.addEventListener("click",e=>this._click(e));}
+  constructor(){super();this._expanded=false;this.attachShadow({mode:"open"});this.shadowRoot.addEventListener("click",e=>this._click(e));}
   setConfig(config){if(!config?.entities?.state||!config.entities.program)throw Error("Dishwasher Card: entities.state and entities.program are required");this._config=config;this._signature="";this._render();}
   set hass(hass){this._hass=hass;const ids=Object.values(this._config?.entities??{}).filter(x=>typeof x==="string");const signature=ids.map(id=>{const st=hass.states[id];return id+":"+(st?.state??"unknown")+":"+((id===this._config.entities.program)?JSON.stringify(st?.attributes?.options??[]):"");}).join("|");if(signature!==this._signature){this._signature=signature;this._render();}}
   getCardSize(){return 7;}
@@ -48,13 +49,14 @@
    const el=e.target.closest("[data-action]");if(!el||el.disabled)return;
    const action=el.dataset.action,c=this._config;
    if(action==="details"){if(c.detail_path){history.pushState(null,"",c.detail_path);window.dispatchEvent(new Event("location-changed"));}else this._moreInfo(c.entities.state);return;}
-   if(action==="program-more"){this._moreInfo(c.entities.program);return;}
+   if(action==="program-more"){this._expanded=!this._expanded;this._render();return;}
    if(action==="program"){
     const id=c.entities.program,st=this._state("program"),option=el.dataset.option;
     const options=st?.attributes?.options??[];
     const raw=this._state("state")?.state?.toLowerCase()??"";
     const running=["run","running","washing","drying","active","on"].includes(raw);
     if(running||!id?.startsWith("select.")||!options.includes(option)||st.state===option)return;
+    this._expanded=false;
     el.disabled=true;
     Promise.resolve(this._hass.callService("select","select_option",{entity_id:id,option})).catch(err=>console.error("Dishwasher Card: program selection failed",err)).finally(()=>{if(el.isConnected)el.disabled=false;});
     return;
@@ -77,10 +79,11 @@
    const pstate=this._state("program"),programCode=pstate?.state??"—";
    const optionList=Array.isArray(pstate?.attributes?.options)?pstate.attributes.options:[];
    const programName=c.program_labels?.[programCode]??programCode.replaceAll("_"," ");
-   const preferred=Array.isArray(c.program_presets)&&c.program_presets.length?c.program_presets:["eco","ai","intensive"];
-   const presets=[...new Set(preferred)].filter(x=>typeof x==="string"&&optionList.includes(x)).slice(0,4);
+   const preferred=Array.isArray(c.program_presets)&&c.program_presets.length?c.program_presets:["eco","ai","intensive","express","glasses","extra_silence","pre_wash"];
+   const presets=[...new Set(preferred)].filter(x=>typeof x==="string"&&optionList.includes(x)).slice(0,7);
    if(!presets.length)presets.push(...optionList.slice(0,3));
-   const icons={eco:"mdi:leaf",ai:"mdi:autorenew",intensive:"mdi:fire",express:"mdi:flash",glasses:"mdi:glass-wine",pre_wash:"mdi:water",extra_silence:"mdi:volume-mute",machine_care:"mdi:washing-machine",...c.program_icons};
+   const icons={eco:"mdi:leaf",ai:"mdi:autorenew",intensive:"mdi:fire",express:"mdi:flash",glasses:"mdi:glass-wine",pre_wash:"mdi:water",extra_silence:"mdi:volume-mute",machine_care:"mdi:auto-fix",pots_and_pans:"mdi:pot-steam",plastics:"mdi:recycle",drinkware:"mdi:glass-cocktail",babycare:"mdi:baby-bottle",...c.program_icons};
+   const remaining=optionList.filter(x=>!presets.includes(x));
    const programActiveOutside=!presets.includes(programCode);
    const canProgramChange=!!pstate&&pstate.state!=="unavailable"&&!running;
    const end=this._state("completion")?.state;
@@ -95,10 +98,10 @@
     const programText=c.program_labels?.[code]??code.replaceAll("_"," ");
     return `<button class="segment-btn ${selected?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${selected}" title="${esc(programText)}" ${!canProgramChange||selected?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon>${esc(programText)}</button>`;
    });
-   if(optionList.length>presets.length){
+   if(remaining.length){
     segments.push(`<button class="segment-btn ${programActiveOutside?"selected":""}" data-action="program-more" title="${esc(L.more)}" aria-label="${esc(L.more)}"><ha-icon icon="mdi:dots-horizontal"></ha-icon>${esc(L.more)}</button>`);
    }
-   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div>${!remote||completion?`<div class="quick-stats">${!remote?`<span class="warn"><ha-icon icon="mdi:remote-off"></ha-icon>${esc(L.remote_off)}</span>`:""}${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>`:""}${segments.length?`<div class="segment">${segments.join("")}</div>`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details" aria-label="${esc(L.details)}" title="${esc(L.details)}"><ha-icon icon="mdi:tune-variant"></ha-icon></button></div></ha-card>`;
+   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div>${!remote||completion?`<div class="quick-stats">${!remote?`<span class="warn"><ha-icon icon="mdi:remote-off"></ha-icon>${esc(L.remote_off)}</span>`:""}${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>`:""}${segments.length?`<div class="segment">${segments.join("")}</div>${this._expanded&&remaining.length?`<div class="segment extras">${remaining.map(code=>`<button class="segment-btn ${code===programCode?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${code===programCode}" title="${esc(c.program_labels?.[code]??code.replaceAll("_"," "))}" ${!canProgramChange||code===programCode?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon>${esc(c.program_labels?.[code]??code.replaceAll("_"," "))}</button>`).join("")}</div>`:""}`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details" aria-label="${esc(L.details)}" title="${esc(L.details)}"><ha-icon icon="mdi:tune-variant"></ha-icon></button></div></ha-card>`;
   }
  }
  customElements.define(TYPE,DishwasherCard);
