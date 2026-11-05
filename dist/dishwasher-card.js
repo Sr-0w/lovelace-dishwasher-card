@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.2.0-dev — native segmented programs, MIT */
+/* Dishwasher Card v0.2.1-dev — native segmented programs, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -69,7 +69,7 @@
   _render(){
    if(!this._hass||!this._config)return;
    const c=this._config;
-   const L={idle:"Idle",running:"Running",paused:"Paused",unavailable:"Unavailable",program:"Program",remote_on:"Remote enabled",remote_off:"Remote disabled",start:"Start",pause:"Pause",resume:"Resume",details:"Options & details",finish:"Finish",more:"Other",...(c.labels??{})};
+   const L={idle:"Idle",running:"Running",paused:"Paused",unavailable:"Unavailable",program:"Program",remote_on:"Remote enabled",remote_off:"Remote disabled",start:"Start",pause:"Pause",resume:"Resume",details:"Options & details",finish:"Finish",more:"Other",power:"Power",...(c.labels??{})};
    const raw=this._state("state")?.state?.toLowerCase()??"unknown";
    const running=["run","running","washing","drying","active","on"].includes(raw),paused=["pause","paused"].includes(raw),stopped=["stop","stopped","idle","off","ready","complete","finished"].includes(raw);
    const status=running?L.running:paused?L.paused:stopped?L.idle:L.unavailable;
@@ -98,7 +98,7 @@
    if(optionList.length>presets.length){
     segments.push(`<button class="segment-btn ${programActiveOutside?"selected":""}" data-action="program-more" title="${esc(L.more)}" aria-label="${esc(L.more)}"><ha-icon icon="mdi:dots-horizontal"></ha-icon>${esc(L.more)}</button>`);
    }
-   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="appico"><ha-icon icon="mdi:dishwasher"></ha-icon></div><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div><div class="sub"><i class="dot"></i>${esc(status)}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:chevron-right"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">POWER</div><div class="power-value">${this._number("power")} W</div></div></div><div class="quick-stats"><span class="${remote?"":"warn"}"><ha-icon icon="mdi:remote"></ha-icon>${esc(remote?L.remote_on:L.remote_off)}</span>${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>${segments.length?`<div class="mode-heading">${esc(L.program)}<span>${!canProgramChange?"●":""}</span></div><div class="segment">${segments.join("")}</div>`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details"><ha-icon icon="mdi:tune"></ha-icon>${esc(L.details)}</button></div></ha-card>`;
+   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="appico"><ha-icon icon="mdi:dishwasher"></ha-icon></div><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div><div class="sub"><i class="dot"></i>${esc(status)}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:chevron-right"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div><div class="quick-stats"><span class="${remote?"":"warn"}"><ha-icon icon="mdi:remote"></ha-icon>${esc(remote?L.remote_on:L.remote_off)}</span>${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>${segments.length?`<div class="mode-heading">${esc(L.program)}<span>${!canProgramChange?"●":""}</span></div><div class="segment">${segments.join("")}</div>`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details"><ha-icon icon="mdi:tune"></ha-icon>${esc(L.details)}</button></div></ha-card>`;
   }
  }
  customElements.define(TYPE,DishwasherCard);
