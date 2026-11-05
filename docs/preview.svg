@@ -1,1 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="430" height="330" viewBox="0 0 430 330"><rect width="430" height="330" rx="18" fill="#18191b"/><rect x="1" y="1" width="428" height="328" rx="17" fill="none" stroke="#4a4a4a"/><path d="M1 57h428" stroke="#373737"/><text x="25" y="36" font-family="Arial,sans-serif" fill="#f3f3f3" font-weight="bold" font-size="18">Dishwasher Card</text><circle cx="390" cy="29" r="5" fill="#68b5ff"/><circle cx="108" cy="163" r="65" fill="none" stroke="#31353b" stroke-width="11"/><path d="M 151 115 A 65 65 0 0 1 160 201" fill="none" stroke="#68b5ff" stroke-width="11" stroke-linecap="round"/><circle cx="108" cy="163" r="45" fill="#242930" stroke="#555"/><text x="108" y="168" text-anchor="middle" font-family="Arial,sans-serif" fill="#c8e1ff" font-size="15" font-weight="bold">READY</text><text x="217" y="119" font-family="Arial,sans-serif" fill="#aaa" font-size="12">PROGRAM</text><text x="217" y="161" font-family="Arial,sans-serif" fill="#f3f3f3" font-size="32">Eco</text><text x="217" y="207" font-family="Arial,sans-serif" fill="#aaa" font-size="14">0 W</text><path d="M1 258h428" stroke="#373737"/><rect x="19" y="272" width="178" height="45" rx="10" fill="#243d43" stroke="#35686e"/><rect x="207" y="272" width="202" height="45" rx="10" fill="#27292c"/><text x="108" y="300" text-anchor="middle" font-family="Arial,sans-serif" fill="#65d6c0" font-size="16">Start</text><text x="308" y="300" text-anchor="middle" font-family="Arial,sans-serif" fill="#e7e7e7" font-size="16">Options &amp; details</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="490" height="335" viewBox="0 0 490 335">
+<rect width="490" height="335" fill="#1c1c1c" rx="17"/><rect x="1" y="1" width="488" height="333" rx="16" fill="none" stroke="#414141"/>
+<text x="21" y="34" fill="#f7f7f7" font-family="Arial,sans-serif" font-size="18" font-weight="600">Lave-vaisselle</text>
+<text x="390" y="34" fill="#b6b6b6" font-family="Arial,sans-serif" font-size="12">À l'arrêt</text>
+<path d="M1 51h488M1 143h488M1 270h488" stroke="#353535"/>
+<text x="21" y="79" fill="#aaa" font-family="Arial,sans-serif" font-size="12">PROGRAMME ACTUEL</text>
+<text x="21" y="118" fill="#f5f5f5" font-family="Arial,sans-serif" font-size="32">Éco</text>
+<text x="402" y="111" fill="#f4f4f4" font-family="Arial,sans-serif" font-size="20">0 W</text>
+<text x="21" y="164" fill="#aaa" font-family="Arial,sans-serif" font-size="12">Programme</text>
+<rect x="18" y="179" width="454" height="77" rx="12" fill="#292929" stroke="#3f3f3f"/>
+<rect x="22" y="183" width="106" height="69" rx="10" fill="#ff6a00"/>
+<text x="75" y="213" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="23">●</text>
+<text x="75" y="239" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="14">Éco</text>
+<text x="184" y="215" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="23">◉</text>
+<text x="184" y="239" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="14">Auto</text>
+<text x="297" y="215" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="23">♨</text>
+<text x="297" y="239" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="14">Intensif</text>
+<text x="416" y="215" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="23">•••</text>
+<text x="416" y="239" text-anchor="middle" fill="#bbb" font-family="Arial,sans-serif" font-size="14">Autres</text>
+<rect x="19" y="283" width="203" height="41" rx="9" fill="#ff6a00"/>
+<text x="120" y="308" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="15">Démarrer</text>
+<rect x="233" y="283" width="238" height="41" rx="9" fill="#2a2a2a"/>
+<text x="352" y="308" text-anchor="middle" fill="#f3f3f3" font-family="Arial,sans-serif" font-size="15">Options et détails</text>
+</svg>
