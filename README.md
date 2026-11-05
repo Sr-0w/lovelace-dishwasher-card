@@ -2,7 +2,7 @@
 
 A compact, device-agnostic Lovelace card with a segmented program selector, simple power/status summary, and context-aware **Start / Pause / Resume** action. The oversized detail button has been replaced by an icon-only settings button.
 
-**Status: v0.3.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
+**Status: v0.4.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
 
 ![Dishwasher Card concept preview](docs/preview.svg)
 
@@ -53,7 +53,7 @@ labels:
   finish: Fin
 ```
 
-The card uses a **native-looking segmented program selector**, without an appliance illustration or circular progress dial. The default visible program shortcuts are **Eco**, **Auto** (`ai`) and **Intensive**. The active choice has an orange background. **Other** opens Home Assistant's entity dialog for any of the other supported cycles. Only supported choices from the `select.*` entity's `options` attribute are shown. Changing a program invokes `select.select_option` and is disabled while a cycle is running.
+The card uses a **native-looking segmented program selector**, without an appliance illustration or circular progress dial. The default visible shortcuts are **Eco**, **Auto** (`ai`), **Intensive**, **Express**, **Glasses**, **Extra silence**, and **Pre-wash** (shown in a 4-column, two-row segmented control). The active choice has an orange background. **Other** expands a second set of selectable program buttons for the remaining supported cycles, directly inside the card. Only supported choices from the `select.*` entity's `options` attribute are shown. Changing a program invokes `select.select_option` and is disabled while a cycle is running.
 
 Use `program_presets` to change the visible shortcuts, and optionally `program_icons` to provide MDI icons (e.g. `eco: mdi:leaf`). Both are device-agnostic. For example:
 
@@ -62,6 +62,10 @@ program_presets:
   - eco
   - ai
   - intensive
+  - express
+  - glasses
+  - extra_silence
+  - pre_wash
 program_icons:
   eco: mdi:leaf
   ai: mdi:autorenew
