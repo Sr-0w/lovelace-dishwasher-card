@@ -1,8 +1,8 @@
 # Dishwasher Card for Home Assistant
 
-A compact, device-agnostic Lovelace card with a program/status dial, cycle state, current power, estimated completion, remote availability, and a context-aware **Start / Pause / Resume** button.
+A compact, device-agnostic Lovelace card with a segmented program selector, simple power/status summary, and context-aware **Start / Pause / Resume** action. The oversized detail button has been replaced by an icon-only settings button.
 
-**Status: 0.1.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
+**Status: v0.3.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
 
 ![Dishwasher Card concept preview](docs/preview.svg)
 
@@ -78,7 +78,7 @@ Remote commands **require** button entities for `start`, `pause`, and `resume`. 
 
 All entity IDs are user-configured. There is **no vendor-specific API**, no external backend, and no network request outside the Home Assistant card interface. Button actions call `hass.callService('button', 'press', ...)` under the HA user's permissions.
 
-Only the primary context-aware command is shown on the card. Cancel/drain, program selection, zones, and sanitation belong in an optional advanced view.
+The primary context-aware Start/Pause/Resume command is shown on the card, alongside an icon-only settings button that navigates to the existing `detail_path`. Program presets are directly accessible on the card. Cancel/drain, zone selection, and sanitation belong in the optional advanced view. Remote-control availability is only highlighted when commands are unavailable; a normal/active remote status is intentionally not shown.
 
 ## Planned before HACS catalog submission
 
