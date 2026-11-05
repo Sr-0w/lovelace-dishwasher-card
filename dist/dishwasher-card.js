@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.4.0-dev — expanded programs and responsive segments, MIT */
+/* Dishwasher Card v0.5.0-dev — compact single-line program selector, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -19,10 +19,11 @@
  .quick-stats{padding:0 17px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--dw-muted);font-size:11px}
  .quick-stats span{display:flex;align-items:center;gap:5px}.quick-stats .warn{color:var(--dw-orange)}.quick-stats ha-icon{--mdc-icon-size:15px}
  .mode-heading{padding:6px 15px 0;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--dw-muted)}
- .segment{margin:9px 12px 11px;padding:4px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:13px;overflow:hidden}
- .segment.extras{margin-top:-3px;background:transparent;border-style:dashed}
- .segment-btn{height:56px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:0;border-radius:10px;background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
- .segment-btn ha-icon{--mdc-icon-size:24px}
+ .segment{margin:8px 12px 10px;padding:3px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;background:var(--secondary-background-color,#292929);border:1px solid var(--divider-color,#393939);border-radius:var(--ha-border-radius-xl,13px);overflow:hidden}
+ .segment.extras{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:-4px;background:transparent;border-style:dashed}
+ .segment-btn{height:45px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px 1px;border:0;border-radius:var(--ha-border-radius-md,8px);background:transparent;color:var(--secondary-text-color,#b8b8b8);font-family:inherit;font-size:9px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color .18s,color .18s,transform .12s}
+ .segment-label{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+ .segment-btn ha-icon{--mdc-icon-size:17px}
  .segment-btn.selected{background:var(--dw-orange);color:#fff;box-shadow:0 2px 7px #0002}
  .segment-btn:disabled{opacity:.35;cursor:not-allowed}
  .segment-btn.selected:disabled{opacity:.8}
@@ -33,7 +34,7 @@
  .button:disabled{opacity:.35;cursor:not-allowed}.button:active:not(:disabled){transform:scale(.98)}
  .button ha-icon{--mdc-icon-size:20px}.primary{background:var(--dw-orange);border-color:var(--dw-orange);color:#fff}
  .secondary{background:var(--secondary-background-color,#292929);color:var(--secondary-text-color,#ccc);border-color:var(--divider-color,#444)} .secondary ha-icon{--mdc-icon-size:22px}
- @media(max-width:355px){.segment{margin:7px 8px 9px}.segment-btn{height:57px;font-size:10px;gap:3px}.segment-btn ha-icon{--mdc-icon-size:21px}.overview{padding:11px}.program-name{font-size:23px}.controls{padding:8px}.button{font-size:11px}}
+ @media(max-width:355px){.segment{margin:7px 8px 9px;padding:2px;gap:1px}.segment-btn{height:43px;font-size:8px;gap:2px}.segment-btn ha-icon{--mdc-icon-size:16px}.overview{padding:11px}.program-name{font-size:23px}.controls{padding:8px}.button{font-size:11px}}
  `;
  class DishwasherCard extends HTMLElement{
   constructor(){super();this._expanded=false;this.attachShadow({mode:"open"});this.shadowRoot.addEventListener("click",e=>this._click(e));}
@@ -96,12 +97,12 @@
    const segments=presets.map(code=>{
     const selected=programCode===code;
     const programText=c.program_labels?.[code]??code.replaceAll("_"," ");
-    return `<button class="segment-btn ${selected?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${selected}" title="${esc(programText)}" ${!canProgramChange||selected?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon>${esc(programText)}</button>`;
+    return `<button class="segment-btn ${selected?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${selected}" title="${esc(programText)}" ${!canProgramChange||selected?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon><span class="segment-label">${esc(c.program_short_labels?.[code]??programText)}</span></button>`;
    });
    if(remaining.length){
-    segments.push(`<button class="segment-btn ${programActiveOutside?"selected":""}" data-action="program-more" title="${esc(L.more)}" aria-label="${esc(L.more)}"><ha-icon icon="mdi:dots-horizontal"></ha-icon>${esc(L.more)}</button>`);
+    segments.push(`<button class="segment-btn ${programActiveOutside?"selected":""}" data-action="program-more" title="${esc(L.more)}" aria-label="${esc(L.more)}"><ha-icon icon="mdi:dots-horizontal"></ha-icon><span class="segment-label">${esc(L.more)}</span></button>`);
    }
-   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div>${!remote||completion?`<div class="quick-stats">${!remote?`<span class="warn"><ha-icon icon="mdi:remote-off"></ha-icon>${esc(L.remote_off)}</span>`:""}${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>`:""}${segments.length?`<div class="segment">${segments.join("")}</div>${this._expanded&&remaining.length?`<div class="segment extras">${remaining.map(code=>`<button class="segment-btn ${code===programCode?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${code===programCode}" title="${esc(c.program_labels?.[code]??code.replaceAll("_"," "))}" ${!canProgramChange||code===programCode?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon>${esc(c.program_labels?.[code]??code.replaceAll("_"," "))}</button>`).join("")}</div>`:""}`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details" aria-label="${esc(L.details)}" title="${esc(L.details)}"><ha-icon icon="mdi:tune-variant"></ha-icon></button></div></ha-card>`;
+   this.shadowRoot.innerHTML=`<style>${style}</style><ha-card style="--state-color:${stateColor}"><div class="head"><div class="headtxt"><div class="title">${esc(c.name??"Dishwasher")}</div></div><button class="details" data-action="details" aria-label="${esc(L.details)}"><ha-icon icon="mdi:dots-vertical"></ha-icon></button></div><div class="overview"><div class="current"><div class="eyebrow">${esc(L.program)}</div><div class="program-name">${esc(programName)}</div></div><div class="power"><div class="eyebrow">${esc(L.power)}</div><div class="power-value">${this._number("power")} W</div></div></div>${!remote||completion?`<div class="quick-stats">${!remote?`<span class="warn"><ha-icon icon="mdi:remote-off"></ha-icon>${esc(L.remote_off)}</span>`:""}${completion?`<span><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(L.finish)} ${esc(completion)}</span>`:""}</div>`:""}${segments.length?`<div class="segment">${segments.join("")}</div>${this._expanded&&remaining.length?`<div class="segment extras">${remaining.map(code=>`<button class="segment-btn ${code===programCode?"selected":""}" data-action="program" data-option="${esc(code)}" aria-pressed="${code===programCode}" title="${esc(c.program_labels?.[code]??code.replaceAll("_"," "))}" ${!canProgramChange||code===programCode?"disabled":""}><ha-icon icon="${esc(icons[code]??"mdi:playlist-play")}"></ha-icon><span class="segment-label">${esc(c.program_short_labels?.[code]??c.program_labels?.[code]??code.replaceAll("_"," "))}</span></button>`).join("")}</div>`:""}`:""}<div class="controls"><button class="button primary" data-action="command" data-key="${key??""}" ${!allowed?"disabled":""}><ha-icon icon="mdi:${running?"pause":"play"}"></ha-icon>${esc(remote?label:L.remote_off)}</button><button class="button secondary" data-action="details" aria-label="${esc(L.details)}" title="${esc(L.details)}"><ha-icon icon="mdi:tune-variant"></ha-icon></button></div></ha-card>`;
   }
  }
  customElements.define(TYPE,DishwasherCard);
