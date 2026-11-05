@@ -1,5 +1,27 @@
 # Dishwasher Card — Configuration guide
 
+## Delayed-start support
+
+Configure the following optional mapping when your integration provides the corresponding entities:
+
+```yaml
+entities:
+  job_state: sensor.dishwasher_detailed_job_state
+  time_left_to_start: sensor.dishwasher_time_left_to_start
+  cycle_duration: sensor.dishwasher_remaining_cycle_time
+  # Optional alternate indicator:
+  operating_progress: sensor.dishwasher_operating_progress
+labels:
+  delayed: Départ programmé
+  starts: Début
+  estimated_finish: Fin estimée
+```
+
+The card detects `delayWashing`, `delay_washing`, `delayWash`, or `delaywash`, shows an expected local start based on `time_left_to_start` at the state update timestamp, and optionally an estimated finish based on cycle duration. It disables the misleading Pause button during the delay and never presents the standard `completion_time` as a trustworthy delayed-finish time. There is no power-consumption heuristic. Once the cycle starts, it uses regular state and completion sensors.
+
+Home Assistant's official SmartThings integration currently omits these Samsung CE sensor entities. The [proposed upstream change](upstream-smartthings-delayed-start.patch) includes an additional detailed job-state sensor, minutes until start, and remaining cycle time. The update to the core integration is **not yet merged**. The card alone cannot expose raw cloud API fields.
+
+
 ## Native visual editor
 
 Open **Home Assistant → Dashboard → Edit → Dishwasher Card → Edit**. The card registers a native `ha-form` editor with searchable entity selectors, a multiple-choice and reorderable program picker, color swatches, display toggles, and expandable groups.
