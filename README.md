@@ -2,9 +2,17 @@
 
 A compact, device-agnostic Lovelace card with a segmented program selector, simple power/status summary, and context-aware **Start / Pause / Resume** action. The oversized detail button has been replaced by an icon-only settings button.
 
-**Status: v0.5.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
+**Status: v0.6.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
 
 ![Dishwasher Card concept preview](docs/preview.svg)
+
+## Visual editor (v0.6.0 development build)
+
+**No YAML required for normal setup.** In Home Assistant's Dashboard edit mode, choose **Edit card** to open the graphical editor. It includes native searchable entity pickers, customizable colors (pickers and CSS inputs), appearance controls, visibility switches and localizable labels. The program selector reads options from your actual dishwasher and allows selecting/reordering presets, custom program labels/icons, and state mappings.
+
+**52 configurable fields** are currently exposed in the visual editor. Full reference: **[Configuration guide](docs/configuration.md)**.
+
+Existing YAML is kept compatible. These are experimental builds; real-browser testing and cross-version validation are required before a stable HACS release.
 
 ## Install (development branch)
 
