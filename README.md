@@ -1,116 +1,107 @@
-# Dishwasher Card for Home Assistant
+# Dishwasher Card
 
-## Scheduled / delayed start support (v0.7.0-dev)
+A Home Assistant dashboard card for dishwashers: status, program selector,
+cycle phase and progress, end time, start / pause / resume, and delayed start.
+It looks and behaves like Home Assistant's own cards, follows your theme and
+speaks your language.
 
-The card can display a **scheduled start** instead of a misleading "Pause" action when a supported detailed job-state entity reports `delay_washing` (or `delayWashing`). It accepts optional `entities.job_state`, `entities.operating_progress`, `entities.time_left_to_start`, and `entities.cycle_duration` entity mappings. When delayed, it shows the computed starting time and optionally the projected finish, suppresses the old `completion_time` and disables misleading pause/program commands. The displayed time uses the reported minutes relative to the sensor's `last_updated` timestamp. These options are also in the visual editor.
+![Dishwasher Card](docs/preview.png)
 
-**Dependency:** Standard Home Assistant SmartThings currently does **not** expose these Samsung CE attributes as sensors. [A proposed upstream patch](docs/upstream-smartthings-delayed-start.patch) adds them. Until those entities exist in HA, the card cannot reliably detect a delayed start. It does not guess based on idle power or `machineState: run`.
+## Features
 
+- **Pick the device, done.** Choose your dishwasher in the card editor: its
+  entities are found automatically (state, program, phase, end time, buttons,
+  delayed start…). You can still change any of them.
+- **Program selector** with icons, built from the program list of your
+  dishwasher, named with Home Assistant's own translations. Pick which programs
+  get a shortcut and in which order; the others stay one tap away under *More*.
+- **Cycle phase and progress.** The current phase (pre-wash, wash, rinse,
+  drying…) next to the end time, and a thin progress bar under it: a real
+  percentage when your dishwasher reports one, otherwise four steps that fill as
+  the cycle advances. A light sweep shows it is running; it stops when paused and
+  respects the system's *reduce motion* setting.
+- **Delayed start.** A clock next to *Start* opens a time picker; the card sets
+  the delay and starts the program. While a delayed start is pending, the card
+  shows when it starts (and ends) and the main button cancels it, with a
+  confirmation.
+- **Safe controls.** Commands are disabled when remote control is off, program
+  changes are locked while a cycle runs, and missing buttons are simply hidden.
+- **Visual editor** with Home Assistant's own pickers: device, entities, theme
+  colours, icons, sliders. No YAML needed.
+- **Translations:** English, French, German, Dutch, Spanish, Italian (every text
+  can be overridden).
 
-A compact, device-agnostic Lovelace card with a segmented program selector, simple power/status summary, and context-aware **Start / Pause / Resume** action. The oversized detail button has been replaced by an icon-only settings button.
+## Compatibility
 
-**Status: v0.6.0 development prototype.** Tested with simulated device states, but **installed for live Home Assistant testing, but visual/device-level testing is still pending**. Do not publish a stable release before testing on real hardware.
+The card only talks to Home Assistant entities, so it works with any
+integration. Automatic discovery and the state names it understands were
+written for:
 
-![Dishwasher Card concept preview](docs/preview.svg)
+| Integration | Discovery | Notes |
+| --- | --- | --- |
+| SmartThings (Samsung) | Tested | Delayed start needs Home Assistant with [core#190800](https://github.com/home-assistant/core/pull/190800) and its follow-up (number *Delay start* + button *Start later*). |
+| Home Connect (Bosch, Siemens, Neff, Gaggenau) | Designed for | Progress in %, finish time, pause / resume / stop. |
+| Miele | Designed for | Program phase, remaining and elapsed time, start / pause / stop. |
+| LG ThinQ | Designed for | Status, remaining time, delayed start countdown. |
+| Anything else | Manual | Map the entities in the editor; unknown state values can be declared under *Advanced*. |
 
-## Visual editor (v0.6.0 development build)
+"Designed for" means the card was checked against those integrations' entity
+names and states, not on a real appliance. Reports and screenshots are very
+welcome.
 
-**No YAML required for normal setup.** In Home Assistant's Dashboard edit mode, choose **Edit card** to open the graphical editor. It includes native searchable entity pickers, customizable colors (pickers and CSS inputs), appearance controls, visibility switches and localizable labels. The program selector reads options from your actual dishwasher and allows selecting/reordering presets, custom program labels/icons, and state mappings.
+Requires Home Assistant 2024.8 or newer.
 
-**52 configurable fields** are currently exposed in the visual editor. Full reference: **[Configuration guide](docs/configuration.md)**.
+## Installation
 
-Existing YAML is kept compatible. These are experimental builds; real-browser testing and cross-version validation are required before a stable HACS release.
+### HACS
 
-## Install (development branch)
+[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Sr-0w&repository=lovelace-dishwasher-card&category=plugin)
 
-1. In **HACS / Marketplace**, add this repository as a **custom Dashboard repository**:
-   `https://github.com/Sr-0w/lovelace-dishwasher-card`
-2. Install **Dishwasher Card**, then reload Home Assistant.
-3. If the resource was not registered automatically, add `/hacsfiles/lovelace-dishwasher-card/dishwasher-card.js` as a **JavaScript module** in **Settings → Dashboards → Resources**.
-4. Add a **Manual** dashboard card.
+1. Open HACS, search for **Dishwasher Card** and download it.
+   If it is not listed yet, add `https://github.com/Sr-0w/lovelace-dishwasher-card`
+   as a custom repository of type **Dashboard** first.
+2. Reload your browser.
 
-## Example
+### Manual
+
+Copy `dist/dishwasher-card.js` to `config/www/`, then add `/local/dishwasher-card.js`
+as a **JavaScript module** in **Settings → Dashboards → ⋮ → Resources**.
+
+## Configuration
+
+Add the card from the dashboard editor (search for *Dishwasher*) and pick your
+dishwasher. That is all most people need.
+
+In YAML, the shortest configuration is the device alone; entities you list
+override what is found:
 
 ```yaml
 type: custom:dishwasher-card
-name: Lave-vaisselle
-detail_path: /dashboard-maison/cuisine-lave-vaisselle
-entities:
-  state: sensor.my_dishwasher_state
-  program: select.my_dishwasher_program
-  phase: sensor.my_dishwasher_job_state
-  completion: sensor.my_dishwasher_completion_time
-  power: sensor.my_dishwasher_power
-  water: sensor.my_dishwasher_water_consumption
-  remote: binary_sensor.my_dishwasher_remote_control
-  start: button.my_dishwasher_start
-  pause: button.my_dishwasher_pause
-  resume: button.my_dishwasher_resume
-program_labels:
-  eco: Éco
-  ai: Auto
-  intensive: Intensif
-  glasses: Verres
-  express: Express
-  pre_wash: Prélavage
-  extra_silence: Silencieux
-labels:
-  idle: À l'arrêt
-  running: En cours
-  paused: En pause
-  unavailable: Indisponible
-  program: Programme
-  remote_on: Commande distante active
-  remote_off: Commande distante désactivée
-  start: Démarrer
-  pause: Pause
-  resume: Reprendre
-  details: Options et détails
-  finish: Fin
+device: 7873171d347e90669f89458235d2c600
 ```
 
-The card uses a **native-looking segmented program selector**, without an appliance illustration or circular progress dial. The default visible shortcuts are **Eco**, **Auto** (`ai`), **Intensive**, **Express**, **Glasses**, **Extra silence**, and **Pre-wash** (shown in a single compact row of 7 buttons plus **Other**). The active choice has an orange background. **Other** expands a second set of selectable program buttons for the remaining supported cycles, directly inside the card. Only supported choices from the `select.*` entity's `options` attribute are shown. Changing a program invokes `select.select_option` and is disabled while a cycle is running.
-
-Use `program_presets` to change the visible shortcuts, `program_short_labels` for short captions that fit on phones (e.g. `intensive: Intens.`), and optionally `program_icons` to provide MDI icons (e.g. `eco: mdi:leaf`). Both are device-agnostic. For example:
+A fuller example:
 
 ```yaml
-program_presets:
-  - eco
-  - ai
-  - intensive
-  - express
-  - glasses
-  - extra_silence
-  - pre_wash
+type: custom:dishwasher-card
+name: Dishwasher
+device: 7873171d347e90669f89458235d2c600
+detail_path: /dashboard-home/dishwasher   # optional, opened by the ⋮ button
+program_presets: [eco, ai, intensive, express, glasses, extra_silence, pre_wash]
 program_short_labels:
   intensive: Intens.
-  extra_silence: Silence
-  pre_wash: Prélav.
-program_icons:
-  eco: mdi:leaf
-  ai: mdi:autorenew
-  intensive: mdi:fire
+colors:
+  active: deep-orange       # a theme colour name, #hex or var(--…)
+show_water: true
 ```
 
-Required entity mappings: `state` and `program`. All others are optional. The state entity supports `run`, `running`, `pause`, `paused`, `stop`, `idle` and other common values.
+See the [configuration reference](docs/configuration.md) for every option.
 
-Remote commands **require** button entities for `start`, `pause`, and `resume`. If the optional `remote` binary sensor is configured, commands are disabled unless it is `on`. Some appliances require remote control to be activated physically on the device before commands become available. No attempt is made to bypass that.
+## Privacy and permissions
 
-While a cycle runs or is paused, the optional `phase` entity (for SmartThings, the dishwasher's **Job state** sensor) is shown as a chip next to the finish time: *Pre-wash*, *Wash*, *Rinse*, *Drying*… The name comes from Home Assistant's own translation of that entity, so it follows the user's language without configuration. Override it with `phase_labels` (e.g. `drying: Séchage doux`), change icons with `phase_icons`, or hide the chip with `show_phase: false`. Below it, a thin four-step bar (pre-wash, wash, rinse, drying) fills as the cycle advances, with a soft light sweep over the current step while it runs; it stops moving when paused and honours the system's reduced-motion setting. Hide it with `show_progress: false`. Nothing is shown before the cycle starts, while a delayed start is pending, or once the phase is `finish`.
+The card runs in your browser and only uses Home Assistant's own API, with the
+permissions of the logged-in user. No network requests, no tracking.
 
-`power` is displayed in watts, `water` is the **cumulative** water reading (not one-cycle consumption), and `completion` expects an ISO-8601 timestamp. The configurable `detail_path` opens an existing view, not one created by this card.
+## License
 
-## Portability and safety
-
-All entity IDs are user-configured. There is **no vendor-specific API**, no external backend, and no network request outside the Home Assistant card interface. Button actions call `hass.callService('button', 'press', ...)` under the HA user's permissions.
-
-The primary context-aware Start/Pause/Resume command is shown on the card, alongside an icon-only settings button that navigates to the existing `detail_path`. Program presets are directly accessible on the card. Cancel/drain, zone selection, and sanitation belong in the optional advanced view. Remote-control availability is only highlighted when commands are unavailable; a normal/active remote status is intentionally not shown.
-
-## Planned before HACS catalog submission
-
-- Test against multiple appliance integrations and unavailable/disconnected states
-- GUI editor, translations, configurable state mapping
-- Real-world action/error tests, responsive and accessibility tests
-- Tagged releases and automated validation
-
-MIT license. Contributions welcome.
+MIT
