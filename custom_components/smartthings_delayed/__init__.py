@@ -5,7 +5,15 @@ from homeassistant.const import CONF_DEVICE_ID, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
+from .services import async_setup_schedule_service
+
 PLATFORMS = [Platform.SENSOR]
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Register an optional scheduling service, without touching devices."""
+    await async_setup_schedule_service(hass)
+    return True
 
 
 def get_smartthings_device(hass: HomeAssistant, device_id: str):
@@ -21,7 +29,7 @@ def get_smartthings_device(hass: HomeAssistant, device_id: str):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up a read-only companion to the official SmartThings integration."""
+    """Set up a companion using the existing official SmartThings connection."""
     found = get_smartthings_device(hass, entry.data[CONF_DEVICE_ID])
     if found is None:
         raise ConfigEntryNotReady("SmartThings dishwasher is not currently loaded")
