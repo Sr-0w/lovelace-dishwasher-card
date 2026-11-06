@@ -1,5 +1,29 @@
 # Dishwasher Card — Configuration guide
 
+## Programming a delayed start
+
+The optional small **clock** button next to **Start** opens a native time picker. A scheduled start can be chosen within the next 24 hours. The card converts the user's local wall-clock time into an integer number of minutes before the appliance should start. **Only pressing Program sends a command**; merely opening or editing the picker never does.
+
+This feature is **opt-in**. Configure:
+
+```yaml
+schedule_service: smartthings_delayed.schedule_start
+entities:
+  job_state: sensor.dishwasher_delayed_start_detailed_job_state
+labels:
+  schedule: Différer
+  schedule_at: Départ à
+  schedule_confirm: Programmer
+  schedule_close: Fermer
+  schedule_hint: Dans les prochaines 24 heures
+```
+
+The scheduling service is provided by the [SmartThings Delayed Start companion integration](../custom_components/smartthings_delayed/). It must be installed through HACS as an integration and configured for an existing SmartThings dishwasher. The service takes `entity_id` (a companion sensor) and `delay_minutes` (1–1440). It checks that the device is online, remote control is enabled, the machine is stopped and the Samsung delayed-start capabilities are present. It then sends `setDishwasherDelayStartTime` followed by `startLater` through the **already-connected official SmartThings client**. It never makes a new cloud connection or changes another appliance.
+
+For a safe test without scheduling anything, call `smartthings_delayed.schedule_start` with `dry_run: true`. This returns a validation result and **sends no SmartThings commands**.
+
+The card hides scheduling during an active or already-delayed cycle, and falls back to its original single Start button on appliances without a configured scheduling service. **Samsung's actual scheduling precision and acceptance of an arbitrary minute value must be verified on the device**; API support and dry-run validation do not guarantee a completed real-world schedule.
+
 ## Delayed-start support
 
 ### Cancel a scheduled start
