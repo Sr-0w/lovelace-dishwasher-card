@@ -1,4 +1,4 @@
-/* Dishwasher Card v0.8.0-dev — scheduled-start time picker, MIT */
+/* Dishwasher Card v0.8.1-dev — scheduled-start time picker, MIT */
 (function DishwasherCardV2(){
  const TYPE="dishwasher-card";
  if(customElements.get(TYPE))return;
@@ -50,9 +50,9 @@
  @media(max-width:355px){.segment{margin:7px 8px 9px;padding:2px;gap:1px}.segment-btn{height:43px;font-size:8px;gap:2px}.segment-btn ha-icon{--mdc-icon-size:16px}.overview{padding:11px}.program-name{font-size:23px}.controls{padding:8px}.button{font-size:11px}}
  `;
  class DishwasherCard extends HTMLElement{
-  constructor(){super();this._expanded=false;this._confirmCancel=false;this._scheduleOpen=false;this._scheduleTime="";this._scheduleBusy=false;this._scheduleError="";this._scheduleNotice="";this.attachShadow({mode:"open"});this.shadowRoot.addEventListener("click",e=>this._click(e));this.shadowRoot.addEventListener("change",e=>{if(e.target.matches?.("input[data-schedule-time]"))this._scheduleTime=e.target.value;});}
+  constructor(){super();this._expanded=false;this._confirmCancel=false;this._scheduleOpen=false;this._scheduleTime="";this._scheduleBusy=false;this._scheduleError="";this._scheduleNotice="";this.attachShadow({mode:"open"});this.shadowRoot.addEventListener("click",e=>this._click(e));const keep=e=>{if(e.target.matches?.("input[data-schedule-time]"))this._scheduleTime=e.target.value;};this.shadowRoot.addEventListener("input",keep);this.shadowRoot.addEventListener("change",keep);}
   setConfig(config){if(!config?.entities?.state||!config.entities.program)throw Error("Dishwasher Card: entities.state and entities.program are required");this._config=config;this._signature="";this._render();}
-  set hass(hass){this._hass=hass;const ids=Object.values(this._config?.entities??{}).filter(x=>typeof x==="string");const signature=ids.map(id=>{const st=hass.states[id];return id+":"+(st?.state??"unknown")+":"+((id===this._config.entities.program)?JSON.stringify(st?.attributes?.options??[]):"");}).join("|");if(signature!==this._signature){this._signature=signature;this._render();}}
+  set hass(hass){this._hass=hass;const ids=Object.values(this._config?.entities??{}).filter(x=>typeof x==="string");const signature=ids.map(id=>{const st=hass.states[id];return id+":"+(st?.state??"unknown")+":"+((id===this._config.entities.program)?JSON.stringify(st?.attributes?.options??[]):"");}).join("|");if(signature!==this._signature){this._signature=signature;if(this._scheduleOpen&&this.shadowRoot.activeElement?.matches?.("input[data-schedule-time]"))return;this._render();}}
   getCardSize(){return 7;}
   getGridOptions(){return {columns:12,rows:"auto"};}
   static getStubConfig(){return {name:"Dishwasher",entities:{state:"sensor.dishwasher_state",program:"select.dishwasher_program"}};}

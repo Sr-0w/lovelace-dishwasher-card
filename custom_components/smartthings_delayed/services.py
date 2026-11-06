@@ -98,7 +98,9 @@ async def async_setup_schedule_service(hass: HomeAssistant) -> None:
             Capability.SAMSUNG_CE_DISHWASHER_OPERATION,
             Command.START_LATER,
             "main",
-            argument=[minutes],
+            # Samsung expects startLater's delay in seconds: sending minutes
+            # made the appliance start after ~minutes/60 minutes instead.
+            argument=[minutes * 60],
         )
         return {
             "validated": True,
