@@ -42,7 +42,7 @@ written for:
 
 | Integration | Discovery | Notes |
 | --- | --- | --- |
-| SmartThings (Samsung) | Tested | Delayed start needs Home Assistant with [core#190800](https://github.com/home-assistant/core/pull/190800) and its follow-up (number *Delay start* + button *Start later*). |
+| SmartThings (Samsung) | Tested | Delayed start needs Home Assistant with [core#190800](https://github.com/home-assistant/core/pull/190800) and [core#190897](https://github.com/home-assistant/core/pull/190897) (number *Delay start* + button *Start later*). |
 | Home Connect (Bosch, Siemens, Neff, Gaggenau) | Designed for | Progress in %, finish time, pause / resume / stop. |
 | Miele | Designed for | Program phase, remaining and elapsed time, start / pause / stop. |
 | LG ThinQ | Designed for | Status, remaining time, delayed start countdown. |
