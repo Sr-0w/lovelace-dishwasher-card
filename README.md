@@ -38,6 +38,7 @@ detail_path: /dashboard-maison/cuisine-lave-vaisselle
 entities:
   state: sensor.my_dishwasher_state
   program: select.my_dishwasher_program
+  phase: sensor.my_dishwasher_job_state
   completion: sensor.my_dishwasher_completion_time
   power: sensor.my_dishwasher_power
   water: sensor.my_dishwasher_water_consumption
@@ -94,6 +95,8 @@ program_icons:
 Required entity mappings: `state` and `program`. All others are optional. The state entity supports `run`, `running`, `pause`, `paused`, `stop`, `idle` and other common values.
 
 Remote commands **require** button entities for `start`, `pause`, and `resume`. If the optional `remote` binary sensor is configured, commands are disabled unless it is `on`. Some appliances require remote control to be activated physically on the device before commands become available. No attempt is made to bypass that.
+
+While a cycle runs or is paused, the optional `phase` entity (for SmartThings, the dishwasher's **Job state** sensor) is shown as a chip next to the finish time: *Pre-wash*, *Wash*, *Rinse*, *Drying*… The name comes from Home Assistant's own translation of that entity, so it follows the user's language without configuration. Override it with `phase_labels` (e.g. `drying: Séchage doux`), change icons with `phase_icons`, or hide the chip with `show_phase: false`. Nothing is shown before the cycle starts, while a delayed start is pending, or once the phase is `finish`.
 
 `power` is displayed in watts, `water` is the **cumulative** water reading (not one-cycle consumption), and `completion` expects an ISO-8601 timestamp. The configurable `detail_path` opens an existing view, not one created by this card.
 
