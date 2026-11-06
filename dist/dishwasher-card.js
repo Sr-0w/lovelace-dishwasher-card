@@ -80,6 +80,42 @@
    const el=e.target.closest("[data-action]");if(!el||el.disabled)return;
    const action=el.dataset.action,c=this._config;
    if(action==="details"){if(c.detail_path){history.pushState(null,"",c.detail_path);window.dispatchEvent(new Event("location-changed"));}else this._moreInfo(c.entities.state);return;}
+   if(action==="schedule-toggle"){
+    if(this._scheduleBusy)return;
+    this._scheduleOpen=!this._scheduleOpen;
+    this._scheduleError="";
+    if(this._scheduleOpen&&!this._scheduleTime){
+     const future=new Date(Date.now()+3600000);
+     this._scheduleTime=String(future.getHours()).padStart(2,"0")+":"+String(future.getMinutes()).padStart(2,"0");
+    }
+    this._render();return;
+   }
+   if(action==="schedule-close"){
+    if(!this._scheduleBusy){this._scheduleOpen=false;this._scheduleError="";this._render();}
+    return;
+   }
+   if(action==="schedule-confirm"){
+    if(this._scheduleBusy||!this._scheduleOpen)return;
+    const [domain,service]=String(c.schedule_service??"").split(".");
+    const state=this._state("state")?.state?.toLowerCase();
+    if(!domain||!service||!c.entities.job_state||state!=="stop"||this._delayedInfo().delayed||c.entities.remote&&this._state("remote")?.state!=="on")return;
+    const chosen=this.shadowRoot.querySelector('input[data-schedule-time]')?.value??this._scheduleTime;
+    const m=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(chosen??"");
+    if(!m){this._scheduleError="Heure invalide";this._render();return;}
+    const now=new Date(),future=new Date(now);
+    future.setHours(Number(m[1]),Number(m[2]),0,0);
+    if(future<=now)future.setDate(future.getDate()+1);
+    const minutes=Math.ceil((future.getTime()-now.getTime())/60000);
+    if(minutes<1||minutes>1440){this._scheduleError="Choisis une heure dans les 24 prochaines heures";this._render();return;}
+    this._scheduleTime=chosen;this._scheduleBusy=true;this._scheduleError="";
+    this._render();
+    Promise.resolve(this._hass.callService(domain,service,{entity_id:c.entities.job_state,delay_minutes:minutes})).then(()=>{
+     this._scheduleOpen=false;this._scheduleNotice="Programmation demandée";
+    }).catch(error=>{this._scheduleError=String(error?.message??error);}).finally(()=>{
+     this._scheduleBusy=false;this._render();
+    });
+    return;
+   }
    if(action==="program-more"){this._expanded=!this._expanded;this._render();return;}
    if(action==="program"){
     const id=c.entities.program,st=this._state("program"),option=el.dataset.option;
