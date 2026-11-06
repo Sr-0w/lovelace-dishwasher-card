@@ -2,6 +2,22 @@
 
 ## Delayed-start support
 
+### Cancel a scheduled start
+
+If `entities.cancel` points to an official SmartThings `button` entity, a delayed-start state shows an **Annuler le départ** action rather than a disabled **Départ programmé** button. The command is deliberately **two-step**: the first tap changes the label to **Confirmer l'annulation**, and only the second tap calls Home Assistant's `button.press` service. It is blocked when the remote-control entity is off, and it is never exposed as the main action after a delayed start ends.
+
+```yaml
+entities:
+  cancel: button.my_dishwasher_cancel
+labels:
+  cancel: Annuler le départ
+  confirm_cancel: Confirmer l'annulation
+```
+
+The action uses the official `CANCEL` command, **not** `cancel_and_drain`. It cancels the scheduled cycle; it does not pause or edit the scheduled start time. The `cancel` entity is optional for other dishwasher brands. **No cancellation command is sent during the card's test or installation.**
+
+
+
 Configure the following optional mapping when your integration provides the corresponding entities:
 
 ```yaml
