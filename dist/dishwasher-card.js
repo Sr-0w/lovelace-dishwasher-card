@@ -816,8 +816,8 @@
     ["show_completion", true], ["show_selector", true], ["show_controls", true], ["show_schedule", true],
     ["show_remote_warning", true], ["show_water", false]];
   const COLORS = [["active", "orange"], ["running", "green"], ["paused", "amber"], ["scheduled", "orange"], ["text", ""], ["background", ""]];
-  const LAYOUT = [["program_columns", 1, 12, 1, ""], ["program_height", 28, 100, 1, "px"], ["program_icon_size", 12, 40, 1, "px"],
-    ["program_font_size", 7, 18, 1, "px"], ["corner_radius", 4, 30, 1, "px"], ["action_height", 30, 80, 1, "px"]];
+  const LAYOUT = [["program_columns", 1, 12, 1, "", undefined], ["program_height", 28, 100, 1, "px", 45], ["program_icon_size", 12, 40, 1, "px", 17],
+    ["program_font_size", 7, 18, 1, "px", 9], ["corner_radius", 4, 30, 1, "px", 13], ["action_height", 30, 80, 1, "px", 46]];
   const STATE_KEYS = ["running", "paused", "delayed", "finished", "stopped", "attention"];
 
   class DishwasherCardEditor extends HTMLElement {
@@ -882,7 +882,10 @@
     _data() {
       const c = this._config, data = { ...c };
       for (const [k, def] of SHOW) data[k] = c[k] ?? def;
+      // Show what the device provides, so the fields are not empty when only `device` is set.
+      if (c.device) data.entities = { ...detectEntities(this._hass, c.device), ...(c.entities ?? {}) };
       for (const k of STATE_KEYS) data[`sv__${k}`] = c.state_values?.[k] ?? "";
+      data.appearance = { ...Object.fromEntries(LAYOUT.filter((l) => l[5] !== undefined).map((l) => [l[0], l[5]])), ...(c.appearance ?? {}) };
       for (const code of this._programOptions().options) {
         data[`pl__${code}`] = c.program_labels?.[code] ?? "";
         data[`ps__${code}`] = c.program_short_labels?.[code] ?? "";
@@ -930,6 +933,7 @@
       const sv = {};
       for (const k of STATE_KEYS) if (v[`sv__${k}`]) sv[k] = v[`sv__${k}`];
       if (Object.keys(sv).length) next.state_values = sv; else delete next.state_values;
+      if (next.appearance) for (const l of LAYOUT) if (next.appearance[l[0]] === l[5]) delete next.appearance[l[0]];
       for (const k of ["entities", "colors", "appearance", "labels"]) {
         if (next[k] && typeof next[k] === "object") {
           for (const [kk, vv] of Object.entries(next[k])) if (vv === "" || vv == null) delete next[k][kk];
@@ -963,7 +967,7 @@
       this._form.schema = this._schema();
       this._form.data = this._data();
       const alert = this.shadowRoot.getElementById("alert");
-      const e = this._config.entities ?? {};
+      const e = this._config.device ? { ...detectEntities(this._hass, this._config.device), ...(this._config.entities ?? {}) } : this._config.entities ?? {};
       if (this._config.device) {
         const missing = ["state", "program"].filter((k) => !e[k]).map((k) => this._e(`e_${k}`));
         alert.innerHTML = missing.length

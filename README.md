@@ -5,7 +5,10 @@ cycle phase and progress, end time, start / pause / resume, and delayed start.
 It looks and behaves like Home Assistant's own cards, follows your theme and
 speaks your language.
 
-![Dishwasher Card](docs/preview.png)
+<p align="center">
+  <img src="docs/preview-light.png" alt="Dishwasher Card, light theme" width="400">
+  <img src="docs/preview-dark.png" alt="Dishwasher Card, dark theme" width="400">
+</p>
 
 ## Features
 
@@ -68,6 +71,8 @@ Copy `dist/dishwasher-card.js` to `config/www/`, then add `/local/dishwasher-car
 as a **JavaScript module** in **Settings → Dashboards → ⋮ → Resources**.
 
 ## Configuration
+
+<img src="docs/editor.png" alt="Dishwasher Card editor" width="320" align="right">
 
 Add the card from the dashboard editor (search for *Dishwasher*) and pick your
 dishwasher. That is all most people need.
